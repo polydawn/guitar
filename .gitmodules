@@ -1,0 +1,6 @@
+[submodule ".gopath/src/github.com/dotcloud/tar"]
+	path = .gopath/src/github.com/dotcloud/tar
+	url = https://github.com/dotcloud/tar
+[submodule ".gopath/src/github.com/jessevdk/go-flags"]
+	path = .gopath/src/github.com/jessevdk/go-flags
+	url = https://github.com/jessevdk/go-flags.git
