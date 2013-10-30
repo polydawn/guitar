@@ -10,7 +10,7 @@ import (
 	"os"
 	"path"
 	"github.com/dotcloud/tar" // Dotcloud's fork of the core tar library
-	"polydawn.net/gar/format"
+	"polydawn.net/guitar/format"
 )
 
 //Given a reader to a tar stream, export the contents to the filesystem.

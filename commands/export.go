@@ -2,7 +2,7 @@ package commands
 
 import (
 	. "fmt"
-	"polydawn.net/gar/stream"
+	"polydawn.net/guitar/stream"
 )
 
 type ExportCmdOpts struct {

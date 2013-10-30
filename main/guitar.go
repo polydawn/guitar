@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/jessevdk/go-flags"
-	. "polydawn.net/gar/commands"
+	. "polydawn.net/guitar/commands"
 	"os"
 )
 
-var parser = flags.NewNamedParser("gar", flags.Default | flags.HelpFlag)
+var parser = flags.NewNamedParser("guitar", flags.Default | flags.HelpFlag)
 
 var EXIT_BADARGS = 1
 var EXIT_PANIC = 2
@@ -43,8 +43,8 @@ func init() {
 	)
 	parser.AddCommand(
 		"version",
-		"Print gar version",
-		"Print gar version",
+		"Print guitar version",
+		"Print guitar version",
 		&VersionCmdOpts{},
 	)
 }

@@ -5,5 +5,5 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 (
 	cd $DIR ;
 	export GOPATH="$PWD"/.gopath/ ;
-	go build -race -o gar polydawn.net/gar/main
+	go build -race -o guitar polydawn.net/guitar/main
 )
