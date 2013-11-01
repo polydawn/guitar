@@ -30,22 +30,24 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 		//Write the file
 		switch hdr.Typeflag {
 
+			//No action taken for these types.
 			case tar.TypeLink:              // hard link
-
-			case tar.TypeSymlink:           //symbolic link
-
 			case tar.TypeChar:              // character device node
-
 			case tar.TypeBlock:             // block device node
-
 			case tar.TypeFifo:              // fifo node
 
-			case tar.TypeDir: 	            // directory
+			// symbolic link
+			case tar.TypeSymlink:
+				//TODO (see issue #2)
+
+			// directory
+			case tar.TypeDir:
 				os.MkdirAll(path.Join(fsPath, hdr.Name), os.ModeDir)
 
-			case tar.TypeReg, tar.TypeRegA: //regular file
-				folder := path.Join(fsPath, path.Dir(hdr.Name))
-				filename   := path.Join(fsPath, hdr.Name)
+			//regular file
+			case tar.TypeReg, tar.TypeRegA:
+				filename := path.Join(fsPath, hdr.Name)
+				folder   := path.Join(fsPath, path.Dir(hdr.Name))
 
 				//Create any folders
 				err := os.MkdirAll(path.Join(folder), os.ModeDir)
@@ -66,7 +68,8 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 					return Errorf("Could not write file " + filename + ": " + err.Error())
 				}
 
-			default:                        // unknown filetype, bad news bears
+			// unknown filetype, bad news bears
+			default:
 				return Errorf("WAT: Unexpected TypeFlag " + string(hdr.Typeflag))
 		}
 
@@ -93,9 +96,6 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 			return Errorf("Error JSON encoding file metadata from tar: " + err.Error())
 		}
 	}
-
-	Println("Done")
-
 
 	return nil
 }
