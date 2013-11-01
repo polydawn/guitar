@@ -12,11 +12,11 @@ import (
 //	See: http://golang.org/pkg/archive/tar/#Header
 type Header struct {
 	Name       string                        // name of header file entry
+	Type       string                        // type of header entry
 	Mode       int64                         // permission and mode bits
+	ModTime    time.Time                     // modified time
 	Uid        int       `json:",omitempty"` // user id of owner
 	Gid        int       `json:",omitempty"` // group id of owner
-	ModTime    time.Time                     // modified time
-	Typeflag   byte                          // type of header entry
 	Linkname   string    `json:",omitempty"` // target name of link
 	Devmajor   int64     `json:",omitempty"` // major number of character or block device
 	Devminor   int64     `json:",omitempty"` // minor number of character or block device
@@ -33,6 +33,23 @@ func HeaderExport(hdr *tar.Header) (*Header, error) {
 		return nil, Errorf("Error converting " + string(hdr.Mode) + " to octal: " + err.Error())
 	}
 
+	//The tar's typeflag is based on integers.
+	//Because of this, it's not immediately obvious to a human was sort of entry it is ("typeflag 54?")
+	//We convert this to an upper-case rune for readability. F: file, D: dir, S: symlink, etc.
+	typeLetter := "Z"
+	switch hdr.Typeflag {
+		case tar.TypeLink:              typeLetter = "H" // hard link
+		case tar.TypeChar:              typeLetter = "C" // character device node
+		case tar.TypeBlock:             typeLetter = "B" // block device node
+		case tar.TypeFifo:              typeLetter = "P" // fifo node
+		case tar.TypeSymlink:           typeLetter = "S" // symbolic link
+		case tar.TypeDir:               typeLetter = "D" // directory
+		case tar.TypeReg, tar.TypeRegA: typeLetter = "F" //regular file
+
+		default: // unknown filetype, bad news bears
+			return nil, Errorf("WAT: Unexpected TypeFlag " + string(hdr.Typeflag))
+	}
+
 	//Copy header values
 	converted := &Header{
 		Name: hdr.Name,
@@ -40,7 +57,7 @@ func HeaderExport(hdr *tar.Header) (*Header, error) {
 		Uid: hdr.Uid,
 		Gid: hdr.Gid,
 		ModTime: hdr.ModTime,
-		Typeflag: hdr.Typeflag,
+		Type: typeLetter,
 		Linkname: hdr.Linkname,
 		Devmajor: hdr.Devmajor,
 		Devminor: hdr.Devminor,
