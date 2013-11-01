@@ -24,7 +24,6 @@ type Header struct {
 
 
 //Exports a tar header into one of our own.
-//Changes the file mode to octal for human-readability and
 func HeaderExport(hdr *tar.Header) (*Header, error) {
 	//Convert integer file mode to octal, because it's 100x more useful that way.
 	//Definitely the best way to convert an integer's base EVAR, more string ops desired
@@ -44,7 +43,7 @@ func HeaderExport(hdr *tar.Header) (*Header, error) {
 		case tar.TypeFifo:              typeLetter = "P" // fifo node
 		case tar.TypeSymlink:           typeLetter = "S" // symbolic link
 		case tar.TypeDir:               typeLetter = "D" // directory
-		case tar.TypeReg, tar.TypeRegA: typeLetter = "F" //regular file
+		case tar.TypeReg, tar.TypeRegA: typeLetter = "F" // regular file (LOSSILY DROP TypeRegA. Who cares? Not me!)
 
 		default: // unknown filetype, bad news bears
 			return nil, Errorf("WAT: Unexpected TypeFlag " + string(hdr.Typeflag))
@@ -53,11 +52,11 @@ func HeaderExport(hdr *tar.Header) (*Header, error) {
 	//Copy header values
 	converted := &Header{
 		Name: hdr.Name,
+		Type: typeLetter,
 		Mode: int64(mode), //cast octal-formatted int to int64
+		ModTime: hdr.ModTime,
 		Uid: hdr.Uid,
 		Gid: hdr.Gid,
-		ModTime: hdr.ModTime,
-		Type: typeLetter,
 		Linkname: hdr.Linkname,
 		Devmajor: hdr.Devmajor,
 		Devminor: hdr.Devminor,
@@ -66,6 +65,42 @@ func HeaderExport(hdr *tar.Header) (*Header, error) {
 	return converted, nil
 }
 
-func HeaderImport(hdr *Header) *tar.Header {
-	return nil
+//Imports our custom header into a tar header.
+func HeaderImport(hdr *Header) (*tar.Header, error) {
+
+	//Convert octal file mode back to integer
+	mode, err := strconv.Atoi(strconv.FormatInt(hdr.Mode, 10))
+	if err != nil {
+		return nil, Errorf("Error converting " + string(hdr.Mode) + " to integer: " + err.Error())
+	}
+
+	//Convert human-friendly character back to tar's integer typeflag.
+	var flag byte = tar.TypeReg
+	switch hdr.Type {
+		case "H": flag = tar.TypeLink    // hard link
+		case "C": flag = tar.TypeChar    // character device node
+		case "B": flag = tar.TypeBlock   // block device node
+		case "P": flag = tar.TypeFifo    // fifo node
+		case "S": flag = tar.TypeSymlink // symbolic link
+		case "D": flag = tar.TypeDir     // directory
+		case "F": flag = tar.TypeReg     // regular file
+
+		default: // unknown filetype, bad news bears
+			return nil, Errorf("WAT: Unexpected type " + hdr.Type)
+	}
+
+	//Copy header values
+	converted := &tar.Header {
+		Name: hdr.Name,
+		Typeflag: flag,
+		Mode: int64(mode), //cast int to int64
+		ModTime: hdr.ModTime,
+		Uid: hdr.Uid,
+		Gid: hdr.Gid,
+		Linkname: hdr.Linkname,
+		Devmajor: hdr.Devmajor,
+		Devminor: hdr.Devminor,
+	}
+
+	return converted, nil
 }

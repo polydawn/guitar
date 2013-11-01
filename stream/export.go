@@ -101,7 +101,6 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 		if err != nil {
 			return Errorf("Error JSON encoding file metadata from tar: " + err.Error())
 		}
-		Println(hdr)
 
 		//Write metadata
 		_, err = metaFile.Write(out)
