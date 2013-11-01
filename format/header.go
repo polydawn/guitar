@@ -68,8 +68,8 @@ func Export(hdr *tar.Header) (*Header, error) {
 //Imports our custom header into a tar header.
 func Import(hdr *Header) (*tar.Header, error) {
 
-	//Convert octal file mode back to integer
-	mode, err := strconv.Atoi(strconv.FormatInt(hdr.Mode, 10))
+	//Convert octal file mode back to base 10
+	mode, err := strconv.ParseInt(strconv.Itoa(int(hdr.Mode)), 8, 64)
 	if err != nil {
 		return nil, Errorf("Error converting " + string(hdr.Mode) + " to integer: " + err.Error())
 	}
@@ -93,7 +93,7 @@ func Import(hdr *Header) (*tar.Header, error) {
 	converted := &tar.Header {
 		Name: hdr.Name,
 		Typeflag: flag,
-		Mode: int64(mode), //cast int to int64
+		Mode: mode,
 		ModTime: hdr.ModTime,
 		Uid: hdr.Uid,
 		Gid: hdr.Gid,
