@@ -42,7 +42,7 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 
 			// directory
 			case tar.TypeDir:
-				os.MkdirAll(path.Join(fsPath, hdr.Name), os.ModeDir)
+				os.MkdirAll(path.Join(fsPath, hdr.Name), 0755)
 
 			//regular file
 			case tar.TypeReg, tar.TypeRegA:
@@ -50,7 +50,7 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 				folder   := path.Join(fsPath, path.Dir(hdr.Name))
 
 				//Create any folders
-				err := os.MkdirAll(path.Join(folder), os.ModeDir)
+				err := os.MkdirAll(path.Join(folder), 0755)
 				if err != nil {
 					return Errorf("Could not create folder " + folder + ": " + err.Error())
 				}
