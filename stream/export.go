@@ -76,7 +76,7 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 		return nil
 	}
 
-	//Export files,
+	//Export files
 	Println("Exporting files...")
 	err := Export(r, forEachFile)
 	if err != nil {
@@ -84,16 +84,35 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 	}
 
 	//Sort headers
-	Println("Sorting metadata...")
+	Println("Exporting metadata...")
 	format.SortHeadersByName(headers)
 
+	//Open metadata folder
+	metaFilename := path.Join(fsPath, ".guitar")
+	metaFile, err := os.Create(metaFilename)
+	if err != nil {
+		return Errorf("Could not create metadata file " + metaFilename + ": " + err.Error())
+	}
+
 	//Print the sorted JSON
-	Println("Encoding metadata...")
 	for _, hdr := range headers {
 		//Convert header to JSON
-		_, err := json.Marshal(hdr)
+		out, err := json.Marshal(hdr)
 		if err != nil {
 			return Errorf("Error JSON encoding file metadata from tar: " + err.Error())
+		}
+		Println(hdr)
+
+		//Write metadata
+		_, err = metaFile.Write(out)
+		if err != nil {
+			return Errorf("Could not write file " + metaFilename + ": " + err.Error())
+		}
+
+		//Write newline to metadata!
+		_, err = metaFile.WriteString("\n")
+		if err != nil {
+			return Errorf("Could not write file " + metaFilename + ": " + err.Error())
 		}
 	}
 
