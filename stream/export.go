@@ -23,7 +23,7 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 	forEachFile := func(stream *tar.Reader, hdr *tar.Header) error {
 
 		//Convert the tar header into a human-friendly format, then cache for later
-		export, err := format.HeaderExport(hdr)
+		export, err := format.Export(hdr)
 		if err != nil { return err }
 		headers = append(headers, export)
 
@@ -85,7 +85,7 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 
 	//Sort headers
 	Println("Exporting metadata...")
-	format.SortHeadersByName(headers)
+	format.SortByName(headers)
 
 	//Open metadata folder
 	metaFilename := path.Join(fsPath, ".guitar")

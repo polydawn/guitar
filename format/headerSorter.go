@@ -27,7 +27,7 @@ func (s *HeaderSorter) Less(i, j int) bool {
 }
 
 //Generic sort function
-func SortHeaders(headers []*Header, by func(h1, h2 *Header) bool) {
+func Sort(headers []*Header, by func(h1, h2 *Header) bool) {
 	sortHeaders := &HeaderSorter {
 		Headers: headers,
 		By: by,
@@ -37,10 +37,10 @@ func SortHeaders(headers []*Header, by func(h1, h2 *Header) bool) {
 }
 
 //Convenience function
-func SortHeadersByName(headers []*Header) {
+func SortByName(headers []*Header) {
 	byName := func(h1, h2 *Header) bool {
 		return h1.Name < h2.Name
 	}
 
-	SortHeaders(headers, byName)
+	Sort(headers, byName)
 }

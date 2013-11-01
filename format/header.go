@@ -24,7 +24,7 @@ type Header struct {
 
 
 //Exports a tar header into one of our own.
-func HeaderExport(hdr *tar.Header) (*Header, error) {
+func Export(hdr *tar.Header) (*Header, error) {
 	//Convert integer file mode to octal, because it's 100x more useful that way.
 	//Definitely the best way to convert an integer's base EVAR, more string ops desired
 	mode, err := strconv.Atoi(strconv.FormatInt(hdr.Mode, 8))
@@ -66,7 +66,7 @@ func HeaderExport(hdr *tar.Header) (*Header, error) {
 }
 
 //Imports our custom header into a tar header.
-func HeaderImport(hdr *Header) (*tar.Header, error) {
+func Import(hdr *Header) (*tar.Header, error) {
 
 	//Convert octal file mode back to integer
 	mode, err := strconv.Atoi(strconv.FormatInt(hdr.Mode, 10))
