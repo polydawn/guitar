@@ -8,7 +8,7 @@ import (
 	. "fmt"
 	"io"
 	"os"
-	"path"
+	"path/filepath"
 	"github.com/dotcloud/tar" // Dotcloud's fork of the core tar library
 	"polydawn.net/guitar/format"
 )
@@ -42,15 +42,15 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 
 			// directory
 			case tar.TypeDir:
-				os.MkdirAll(path.Join(fsPath, hdr.Name), 0755)
+				os.MkdirAll(filepath.Join(fsPath, hdr.Name), 0755)
 
 			//regular file
 			case tar.TypeReg, tar.TypeRegA:
-				filename := path.Join(fsPath, hdr.Name)
-				folder   := path.Join(fsPath, path.Dir(hdr.Name))
+				filename := filepath.Join(fsPath, hdr.Name)
+				folder   := filepath.Join(fsPath, filepath.Dir(hdr.Name))
 
 				//Create any folders
-				err := os.MkdirAll(path.Join(folder), 0755)
+				err := os.MkdirAll(filepath.Join(folder), 0755)
 				if err != nil {
 					return Errorf("Could not create folder " + folder + ": " + err.Error())
 				}
@@ -88,7 +88,7 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 	format.SortByName(headers)
 
 	//Open metadata folder
-	metaFilename := path.Join(fsPath, ".guitar")
+	metaFilename := filepath.Join(fsPath, ".guitar")
 	metaFile, err := os.Create(metaFilename)
 	if err != nil {
 		return Errorf("Could not create metadata file " + metaFilename + ": " + err.Error())
