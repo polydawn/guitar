@@ -4,12 +4,12 @@ package stream
 //This is because git does not store everything we need, so we store that separately in a metadata file.
 
 import (
+	"archive/tar"
 	"encoding/json"
 	. "fmt"
 	"io"
 	"os"
 	"path/filepath"
-	"github.com/dotcloud/tar" // Dotcloud's fork of the core tar library
 	"polydawn.net/guitar/format"
 )
 

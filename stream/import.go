@@ -3,13 +3,13 @@ package stream
 // He was a bear, all along.
 
 import (
+	"archive/tar"
 	"bufio"
 	"encoding/json"
 	. "fmt"
 	"io"
 	"os"
 	"path/filepath"
-	"github.com/dotcloud/tar" // Dotcloud's fork of the core tar library
 	"polydawn.net/guitar/format"
 )
 

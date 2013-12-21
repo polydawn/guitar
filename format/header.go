@@ -1,10 +1,10 @@
 package format
 
 import (
+	"archive/tar"
 	. "fmt"
 	"strconv"
 	"time"
-	"github.com/dotcloud/tar" // Dotcloud's fork of the core tar library
 )
 
 //A subset of the tar package's header. We don't need every field.
