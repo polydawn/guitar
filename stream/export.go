@@ -13,8 +13,16 @@ import (
 	"polydawn.net/guitar/format"
 )
 
+//Given a reader, export the contents to the filesystem.
+func ExportFromReaderToFilesystem(r *io.Reader, fsPath string) error {
+	//Connect a tar reader
+	stream := tar.NewReader(*r)
+
+	return ExportToFilesystem(stream, fsPath)
+}
+
 //Given a reader to a tar stream, export the contents to the filesystem.
-func ExportToFilesystem(r io.Reader, fsPath string) error {
+func ExportToFilesystem(r *tar.Reader, fsPath string) error {
 	//A set of headers. These are cached then sorted before writing as metadata.
 	//This ensures the same filesystem will always the same metadata, because tar archives do not guarantee ordering.
 	headers := make([]*format.Header, 0)
@@ -119,14 +127,11 @@ func ExportToFilesystem(r io.Reader, fsPath string) error {
 }
 
 //Given a reader to a tar stream, run a closure for every file with its header.
-func Export(r io.Reader, fn func(*tar.Reader, *tar.Header) error) error {
-	//Connect a tar reader
-	stream := tar.NewReader(r)
-
+func Export(r *tar.Reader, fn func(*tar.Reader, *tar.Header) error) error {
 	// Iterate through the files in the archive.
 	for {
 		//Read the header for the next file.
-		hdr, err := stream.Next()
+		hdr, err := r.Next()
 
 		//Check for errors
 		if err == io.EOF {
@@ -136,7 +141,7 @@ func Export(r io.Reader, fn func(*tar.Reader, *tar.Header) error) error {
 		}
 
 		//Run
-		err = fn(stream, hdr)
+		err = fn(r, hdr)
 		if (err != nil) {
 			return Errorf("Error exporting file " + hdr.Name + ": " + err.Error())
 		}

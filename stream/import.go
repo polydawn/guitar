@@ -13,12 +13,17 @@ import (
 	"polydawn.net/guitar/format"
 )
 
-//Given a writer to a tar stream, import from the filesystem.
-func ImportFromFilesystem(w io.WriteCloser, basePath string) error {
-	defer w.Close()
-
+//Given a writercloser, import from the filesystem.
+func ImportToWriterFromFilesystem(w *io.WriteCloser, basePath string) error {
 	//Open a tar writer
-	out := tar.NewWriter(w)
+	out := tar.NewWriter(*w)
+
+	return ImportFromFilesystem(out, basePath)
+}
+
+//Given a writer to a tar stream, import from the filesystem.
+func ImportFromFilesystem(w *tar.Writer, basePath string) error {
+	defer w.Close()
 
 	//Get a sane path.
 	tempDir, err := filepath.Abs(filepath.Clean(basePath))
@@ -75,25 +80,25 @@ func ImportFromFilesystem(w io.WriteCloser, basePath string) error {
 				header.Size = info.Size()
 
 				//Write the header
-				err = out.WriteHeader(header)
+				err = w.WriteHeader(header)
 				if (err != nil) { return err }
 
 				//Write the file
-				_, err = io.Copy(out, file)
+				_, err = io.Copy(w, file)
 				if err != nil {
 					return Errorf("Could not write file " + filename + ": " + err.Error())
 				}
 				file.Close()
 			default: //everything
 				//Write the header
-				err = out.WriteHeader(header)
+				err = w.WriteHeader(header)
 				if (err != nil) { return err }
 		}
 	}
 
 	//Write all the hardlinks
 	for _, hdr := range hardLinks {
-		err = out.WriteHeader(hdr)
+		err = w.WriteHeader(hdr)
 		if (err != nil) { return err }
 	}
 
