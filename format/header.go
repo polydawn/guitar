@@ -54,7 +54,7 @@ func Export(hdr *tar.Header) (*Header, error) {
 		Name: hdr.Name,
 		Type: typeLetter,
 		Mode: int64(mode), //cast octal-formatted int to int64
-		ModTime: hdr.ModTime,
+		ModTime: hdr.ModTime.UTC(),
 		Uid: hdr.Uid,
 		Gid: hdr.Gid,
 		Linkname: hdr.Linkname,
