@@ -15,7 +15,7 @@ import (
 )
 
 //Given a reader, export the contents to the filesystem.
-func ExportFromReaderToFilesystem(r *io.Reader, fsPath string, settings *conf.Settings) error {
+func ExportFromReaderToFilesystem(r *io.Reader, fsPath string, settings conf.Settings) error {
 	//Connect a tar reader
 	stream := tar.NewReader(*r)
 
@@ -23,7 +23,7 @@ func ExportFromReaderToFilesystem(r *io.Reader, fsPath string, settings *conf.Se
 }
 
 //Given a reader to a tar stream, export the contents to the filesystem.
-func ExportToFilesystem(r *tar.Reader, fsPath string, settings *conf.Settings) error {
+func ExportToFilesystem(r *tar.Reader, fsPath string, settings conf.Settings) error {
 	//A set of headers. These are cached then sorted before writing as metadata.
 	//This ensures the same filesystem will always the same metadata, because tar archives do not guarantee ordering.
 	headers := make([]*format.Header, 0)
