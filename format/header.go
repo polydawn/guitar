@@ -50,21 +50,30 @@ func Export(hdr *tar.Header, settings conf.Settings) (*Header, error) {
 			return nil, Errorf("WAT: Unexpected TypeFlag " + string(hdr.Typeflag))
 	}
 
+	var t time.Time
+	if settings.Epoch {
+		t = time.Time{}
+	} else {
+		if hdr.ModTime.Equal(time.Time{}) {
+			// force "zero" value, so it's not serialized
+			// epoch times are... zero... ish.  but not necessarily "zero" in the golang def
+			t = time.Time{}
+		} else {
+			t = hdr.ModTime.UTC()
+		}
+	}
+
 	//Copy header values
 	converted := &Header{
 		Name: hdr.Name,
 		Type: typeLetter,
 		Mode: int64(mode), //cast octal-formatted int to int64
-		ModTime: hdr.ModTime.UTC(),
+		ModTime: t,
 		Uid: hdr.Uid,
 		Gid: hdr.Gid,
 		Linkname: hdr.Linkname,
 		Devmajor: hdr.Devmajor,
 		Devminor: hdr.Devminor,
-	}
-
-	if settings.Epoch {
-		converted.ModTime = time.Time{}
 	}
 
 	return converted, nil
