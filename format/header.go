@@ -5,7 +5,10 @@ import (
 	. "fmt"
 	"strconv"
 	"time"
+	"polydawn.net/guitar/conf"
 )
+
+var time_epoch = time.Unix(0, 0)
 
 //A subset of the tar package's header. We don't need every field.
 //Also added some annotations to some commonly-zero fields, reducing noise.
@@ -14,7 +17,7 @@ type Header struct {
 	Name       string                        // name of header file entry
 	Type       string                        // type of header entry
 	Mode       int64                         // permission and mode bits
-	ModTime    time.Time                     // modified time
+	ModTime    *time.Time `json:",omitempty"` // modified time
 	Uid        int       `json:",omitempty"` // user id of owner
 	Gid        int       `json:",omitempty"` // group id of owner
 	Linkname   string    `json:",omitempty"` // target name of link
@@ -24,7 +27,7 @@ type Header struct {
 
 
 //Exports a tar header into one of our own.
-func Export(hdr *tar.Header) (*Header, error) {
+func Export(hdr *tar.Header, settings conf.Settings) (*Header, error) {
 	//Convert integer file mode to octal, because it's 100x more useful that way.
 	//Definitely the best way to convert an integer's base EVAR, more string ops desired
 	mode, err := strconv.Atoi(strconv.FormatInt(hdr.Mode, 8))
@@ -49,12 +52,27 @@ func Export(hdr *tar.Header) (*Header, error) {
 			return nil, Errorf("WAT: Unexpected TypeFlag " + string(hdr.Typeflag))
 	}
 
+	var t *time.Time
+	if settings.Epoch {
+		t = nil
+	} else {
+		if hdr.ModTime.Equal(time_epoch) {
+			// force "zero" value, so it's not serialized
+			// epoch times are... zero... ish.  but not necessarily "zero" in the golang def
+			// also literal golang "zero" a la `time.Time{}` is not actually "zero" for the purpose of not being serialized, evidentally
+			t = nil
+		} else {
+			godfuckingdamnitgolang := hdr.ModTime.UTC()
+			t = &godfuckingdamnitgolang
+		}
+	}
+
 	//Copy header values
 	converted := &Header{
 		Name: hdr.Name,
 		Type: typeLetter,
 		Mode: int64(mode), //cast octal-formatted int to int64
-		ModTime: hdr.ModTime.UTC(),
+		ModTime: t,
 		Uid: hdr.Uid,
 		Gid: hdr.Gid,
 		Linkname: hdr.Linkname,
@@ -89,12 +107,16 @@ func Import(hdr *Header) (*tar.Header, error) {
 			return nil, Errorf("WAT: Unexpected type " + hdr.Type)
 	}
 
+	if hdr.ModTime == nil {
+		hdr.ModTime = &time_epoch
+	}
+
 	//Copy header values
 	converted := &tar.Header {
 		Name: hdr.Name,
 		Typeflag: flag,
 		Mode: mode,
-		ModTime: hdr.ModTime,
+		ModTime: *hdr.ModTime,
 		Uid: hdr.Uid,
 		Gid: hdr.Gid,
 		Linkname: hdr.Linkname,

@@ -10,19 +10,20 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"polydawn.net/guitar/conf"
 	"polydawn.net/guitar/format"
 )
 
 //Given a reader, export the contents to the filesystem.
-func ExportFromReaderToFilesystem(r *io.Reader, fsPath string) error {
+func ExportFromReaderToFilesystem(r *io.Reader, fsPath string, settings conf.Settings) error {
 	//Connect a tar reader
 	stream := tar.NewReader(*r)
 
-	return ExportToFilesystem(stream, fsPath)
+	return ExportToFilesystem(stream, fsPath, settings)
 }
 
 //Given a reader to a tar stream, export the contents to the filesystem.
-func ExportToFilesystem(r *tar.Reader, fsPath string) error {
+func ExportToFilesystem(r *tar.Reader, fsPath string, settings conf.Settings) error {
 	//A set of headers. These are cached then sorted before writing as metadata.
 	//This ensures the same filesystem will always the same metadata, because tar archives do not guarantee ordering.
 	headers := make([]*format.Header, 0)
@@ -31,7 +32,7 @@ func ExportToFilesystem(r *tar.Reader, fsPath string) error {
 	forEachFile := func(stream *tar.Reader, hdr *tar.Header) error {
 
 		//Convert the tar header into a human-friendly format, then cache for later
-		export, err := format.Export(hdr)
+		export, err := format.Export(hdr, settings)
 		if err != nil { return err }
 		headers = append(headers, export)
 
