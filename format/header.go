@@ -14,7 +14,7 @@ type Header struct {
 	Name       string                        // name of header file entry
 	Type       string                        // type of header entry
 	Mode       int64                         // permission and mode bits
-	ModTime    time.Time                     // modified time
+	ModTime    time.Time `json:",omitempty"` // modified time
 	Uid        int       `json:",omitempty"` // user id of owner
 	Gid        int       `json:",omitempty"` // group id of owner
 	Linkname   string    `json:",omitempty"` // target name of link
