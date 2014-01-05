@@ -60,7 +60,8 @@ func Export(hdr *tar.Header, settings conf.Settings) (*Header, error) {
 			// also literal golang "zero" a la `time.Time{}` is not actually "zero" for the purpose of not being serialized, evidentally
 			t = nil
 		} else {
-			t = &hdr.ModTime.UTC()
+			godfuckingdamnitgolang := hdr.ModTime.UTC()
+			t = &godfuckingdamnitgolang
 		}
 	}
 
