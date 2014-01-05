@@ -8,6 +8,8 @@ import (
 	"polydawn.net/guitar/conf"
 )
 
+var time_epoch = time.Unix(0, 0)
+
 //A subset of the tar package's header. We don't need every field.
 //Also added some annotations to some commonly-zero fields, reducing noise.
 //	See: http://golang.org/pkg/archive/tar/#Header
@@ -54,7 +56,7 @@ func Export(hdr *tar.Header, settings conf.Settings) (*Header, error) {
 	if settings.Epoch {
 		t = nil
 	} else {
-		if hdr.ModTime.Equal(time.Unix(0,0)) {
+		if hdr.ModTime.Equal(time_epoch) {
 			// force "zero" value, so it's not serialized
 			// epoch times are... zero... ish.  but not necessarily "zero" in the golang def
 			// also literal golang "zero" a la `time.Time{}` is not actually "zero" for the purpose of not being serialized, evidentally
@@ -103,6 +105,10 @@ func Import(hdr *Header) (*tar.Header, error) {
 
 		default: // unknown filetype, bad news bears
 			return nil, Errorf("WAT: Unexpected type " + hdr.Type)
+	}
+
+	if hdr.ModTime == nil {
+		hdr.ModTime = &time_epoch
 	}
 
 	//Copy header values
