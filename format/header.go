@@ -54,7 +54,7 @@ func Export(hdr *tar.Header, settings conf.Settings) (*Header, error) {
 	if settings.Epoch {
 		t = time.Time{}
 	} else {
-		if hdr.ModTime.Equal(time.Time{}) {
+		if hdr.ModTime.Equal(time.Unix(0,0)) {
 			// force "zero" value, so it's not serialized
 			// epoch times are... zero... ish.  but not necessarily "zero" in the golang def
 			t = time.Time{}
