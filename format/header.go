@@ -15,7 +15,7 @@ type Header struct {
 	Name       string                        // name of header file entry
 	Type       string                        // type of header entry
 	Mode       int64                         // permission and mode bits
-	ModTime    time.Time `json:",omitempty"` // modified time
+	ModTime    *time.Time `json:",omitempty"` // modified time
 	Uid        int       `json:",omitempty"` // user id of owner
 	Gid        int       `json:",omitempty"` // group id of owner
 	Linkname   string    `json:",omitempty"` // target name of link
@@ -50,16 +50,17 @@ func Export(hdr *tar.Header, settings conf.Settings) (*Header, error) {
 			return nil, Errorf("WAT: Unexpected TypeFlag " + string(hdr.Typeflag))
 	}
 
-	var t time.Time
+	var t *time.Time
 	if settings.Epoch {
-		t = time.Time{}
+		t = nil
 	} else {
 		if hdr.ModTime.Equal(time.Unix(0,0)) {
 			// force "zero" value, so it's not serialized
 			// epoch times are... zero... ish.  but not necessarily "zero" in the golang def
-			t = time.Time{}
+			// also literal golang "zero" a la `time.Time{}` is not actually "zero" for the purpose of not being serialized, evidentally
+			t = nil
 		} else {
-			t = hdr.ModTime.UTC()
+			t = &hdr.ModTime.UTC()
 		}
 	}
 
@@ -108,7 +109,7 @@ func Import(hdr *Header) (*tar.Header, error) {
 		Name: hdr.Name,
 		Typeflag: flag,
 		Mode: mode,
-		ModTime: hdr.ModTime,
+		ModTime: *hdr.ModTime,
 		Uid: hdr.Uid,
 		Gid: hdr.Gid,
 		Linkname: hdr.Linkname,
