@@ -5,6 +5,7 @@ import (
 	. "fmt"
 	"strconv"
 	"time"
+	"polydawn.net/guitar/conf"
 )
 
 //A subset of the tar package's header. We don't need every field.
@@ -24,7 +25,7 @@ type Header struct {
 
 
 //Exports a tar header into one of our own.
-func Export(hdr *tar.Header) (*Header, error) {
+func Export(hdr *tar.Header, settings *conf.Settings) (*Header, error) {
 	//Convert integer file mode to octal, because it's 100x more useful that way.
 	//Definitely the best way to convert an integer's base EVAR, more string ops desired
 	mode, err := strconv.Atoi(strconv.FormatInt(hdr.Mode, 8))
@@ -60,6 +61,10 @@ func Export(hdr *tar.Header) (*Header, error) {
 		Linkname: hdr.Linkname,
 		Devmajor: hdr.Devmajor,
 		Devminor: hdr.Devminor,
+	}
+
+	if settings.Epoch {
+		converted.ModTime = time.Time{}
 	}
 
 	return converted, nil
